@@ -1,40 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sofax_assessment/src/core/repository/auth_repository.dart';
 import 'package:sofax_assessment/src/core/router/router.gr.dart';
 import 'package:sofax_assessment/src/core/views/screens/profile/profile_screen.dart';
 import 'package:sofax_assessment/src/core/x_controller/routes/routes_controller.dart';
-import '../base_controller/base_controller.dart';
 import '../../../../src/core/model/user.dart';
-import '../../../services/api/client/auth_api.dart';
 import '../../../services/api/request/login_request.dart';
 import '../../../constant/enum.dart';
 import '../../model/last_login.dart';
 
 class AuthController extends GetxController {
-  final baseController = Get.find<BaseController>();
   final router = Get.find<RoutesController>().router;
+  final authRepository = Get.find<AuthRepository>();
+
+  //ui controller
   final emailTextEditingController = TextEditingController();
   final passwordTextEditingController = TextEditingController();
-  var user = Rxn<User>();
-  late AuthAPI authAPI;
-  User? get currentUser => user.value;
 
-  @override
-  void onInit() {
-    super.onInit();
-    authAPI = AuthAPI(
-      baseController.dio,
-      baseUrl: "https://app.fakejson.com",
-    );
-  }
+  //obs
+  var user = Rxn<User>();
+  User? get currentUser => user.value;
 
   void login() async {
     if (emailTextEditingController.text.isEmpty) {
       return;
     }
     try {
-      final request = generateRequest();
-      final response = await authAPI.login(request: request);
+      final response = await authRepository.login(generateRequest());
       user.value = response;
       router.push(ProfileScreenRoute(
         payload: ProfileScreenPayload(
